@@ -1,4 +1,7 @@
+from flask import Flask, request, jsonify
 from fpl import FPL
+
+app = Flask(__name__)
 
 def get_fpl_points(team_id, gameweek=None):
     try:
@@ -18,26 +21,18 @@ def get_fpl_points(team_id, gameweek=None):
     except Exception as e:
         return str(e)
 
-def main():
-    print("Welcome to the FPL Points Checker!")
-
+@app.route('/api/fpl/points', methods=['GET'])
+def api_fpl_points():
     try:
-        team_id = int(input("Enter your FPL team ID: "))
+        team_id = int(request.args.get('team_id'))
         result = get_fpl_points(team_id)
 
-        print(result)
-
-        choice = input("Do you want to check points for a specific gameweek? (yes/no): ").strip().lower()
-        if choice == 'yes':
-            gameweek = int(input("Enter the gameweek you want to check: "))
-            gameweek_result = get_fpl_points(team_id, gameweek)
-            print(gameweek_result)
+        return jsonify({"message": result})
     except ValueError:
-        print("Please enter a valid team ID.")
+        return jsonify({"error": "Please provide a valid team ID."}), 400
     except Exception as e:
-        print(f"An error occurred: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    main()
-
+    app.run(debug=True)
 
